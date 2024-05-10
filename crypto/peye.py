@@ -165,13 +165,14 @@ class KeyGenerator:
 '''
 class PortionVoiting():
     def __init__(self, Nv, Nc, max_voices_elector, bit_lenght):
-        self._down_border_n = sum([10**i for i in range(Nc-1, max_voices_elector-1, -1)])
+        self._down_border_n = sum([10**i for i in range(Nc, max_voices_elector-1, -1)])
         self._generator = KeyGenerator(self._down_border_n, bit_lenght)
         self._Nv = Nv
         self._Nc = Nc
         self._b = Nv + 1
         self._enc_voices = []
         self._enc_res = 1
+        self._dec_res = 0
 
     def start_portion(self):
         self._generator.gen_keys()
@@ -200,10 +201,23 @@ class PortionVoiting():
     def dec_res(self):
         closed_key = self.get_closed_key()
         open_key = self.get_open_key()
-        dec_res = (self._enc_res**closed_key[0])%open_key[0]**2
-        dec_res = dec_res // open_key[0]
-        dec_res = (dec_res * closed_key[1])%open_key[0]
-        return dec_res
+        self._dec_res = (self._enc_res**closed_key[0])%open_key[0]**2
+        self._dec_res = self._dec_res // open_key[0]
+        self._dec_res = (self._dec_res * closed_key[1])%open_key[0]
+    
+    def get_dec_res(self):
+        return self._dec_res
+    
+    # def parse_result(self):
+    #     digits_count = {}
+    #     number_str = str(self._dec_res)
+    #     for i in range(len(number_str)):
+    #         place = 10 ** (len(number_str) - i - 1)
+    #         digit = int(number_str[i])
+    #         digits_count[place] = digit
+    #     return digits_count
+    
+
 
 
 '''Класс, который отвечает за все голосование (подсчет по сессиям)
@@ -227,86 +241,105 @@ class VoiceEncoder:
     def __init__(self, open_key):
         self._open_key = open_key
     def get_u(self, n):
-        Zn_ring = PayePrimitiveOperations.get_Zn_ring(open_key[0])
+        Zn_ring = PayePrimitiveOperations.get_Zn_ring(self._open_key[0])
         return random.choice(Zn_ring)
 
     def create_voice(self, m):
-        u = self.get_u(open_key[0])
-        enc_voice = (open_key[1]**m*u**open_key[0])%open_key[0]**2
+        u = self.get_u(self._open_key[0])
+        enc_voice = (self._open_key[1]**m*u**self._open_key[0])%self._open_key[0]**2
         return enc_voice
 
+'''Разбор результата голосоания'''
+def parse_result(n):
+        digits_count = {}
+        number_str = str(n)
+        for i in range(len(number_str)):
+            place = 10 ** (len(number_str) - i - 1)
+            digit = int(number_str[i])
+            digits_count[place] = digit
+        return digits_count
 
 '''Юнит-тесты на полшишки'''
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # generator = KeyGenerator(100000, 10)
-    # generator.gen_keys()
-    # print(generator.get_open_key())
-    # print(generator.get_close_key())
+#     # generator = KeyGenerator(100000, 10)
+#     # generator.gen_keys()
+#     # print(generator.get_open_key())
+#     # print(generator.get_close_key())
 
-    # generator.gen_keys()
+#     # generator.gen_keys()
 
-    # print('\n\n\n')
-    # print(generator.get_open_key())
-    # print(generator.get_close_key())
-
-
-    #Сгенерировать криптограммы
-    portion = PortionVoiting(9, 5, 2, 10)
-    portion.start_portion()
-    open_key = portion.get_open_key()
-
-    encoder = VoiceEncoder(open_key)
-
-    portion.append_enc_voice(encoder.create_voice(100))
-
-    portion.count_voices()
-    print(f"Расшированные голоса:{portion.dec_res()}")
+#     # print('\n\n\n')
+#     # print(generator.get_open_key())
+#     # print(generator.get_close_key())
 
 
+#     #Сгенерировать криптограммы
+#     portion = PortionVoiting(9, 5, 2, 10)
+#     portion.start_portion()
+#     open_key = portion.get_open_key()
 
+#     encoder = VoiceEncoder(open_key)
 
+#     portion.append_enc_voice(encoder.create_voice(100))
+#     portion.append_enc_voice(encoder.create_voice(10000))
 
+#     portion.count_voices()
+#     portion.dec_res()
+#     # dec_res = portion.dec_res()
+#     # print(f"Расшированные голоса:{portion.dec_res()}")
 
-    # print(open_key['y'])
+#     portion2 = PortionVoiting(9, 5, 2, 10)
+#     portion2.start_portion()
+#     open_key = portion2.get_open_key()
+#     encoder = VoiceEncoder(open_key)
+
+#     portion2.append_enc_voice(encoder.create_voice(100))
+#     portion2.append_enc_voice(encoder.create_voice(1000))
+#     portion2.count_voices()
+#     portion2.dec_res()
+#     print(portion.get_dec_res()+portion2.get_dec_res(), "\n")
+#     print(f"Расшированные голоса:{parse_result(portion.get_dec_res()+portion2.get_dec_res())}")
+
+#     # print(open_key['y'])
     
-    # bit_length = 10  # заданное количество бит
-    # found = False
-    # while not found:
-    #     p = generate_random_prime(bit_length)
-    #     q = generate_random_prime(bit_length)
-    #     n = p * q
-    #     phi_n = (p - 1) * (q - 1)
-    #     if gcd(n, (p - 1)*(q - 1)) == 1:
-    #         found = True
+#     # bit_length = 10  # заданное количество бит
+#     # found = False
+#     # while not found:
+#     #     p = generate_random_prime(bit_length)
+#     #     q = generate_random_prime(bit_length)
+#     #     n = p * q
+#     #     phi_n = (p - 1) * (q - 1)
+#     #     if gcd(n, (p - 1)*(q - 1)) == 1:
+#     #         found = True
 
-    # print(f"Найдены простые числа p и q: p={p}, q={q}")
-    # print(f"p*q = {p*q}, (p-1)(q-1) = {phi_n}")
+#     # print(f"Найдены простые числа p и q: p={p}, q={q}")
+#     # print(f"p*q = {p*q}, (p-1)(q-1) = {phi_n}")
 
-    # # n = 10  # Задаем значение n
-    # # Zn_ring = get_Zn_ring(n)
-    # # print(f"Кольцо Z{str(n)}* состоит из следующих элементов: {Zn_ring}")
-    # n = p*q
-    # Zn_ring = get_Zn_ring(n)
-    # y = get_random_element(Zn_ring)
-    # print(f"Сформирован открытый ключ: n={n} y = {y}")
+#     # # n = 10  # Задаем значение n
+#     # # Zn_ring = get_Zn_ring(n)
+#     # # print(f"Кольцо Z{str(n)}* состоит из следующих элементов: {Zn_ring}")
+#     # n = p*q
+#     # Zn_ring = get_Zn_ring(n)
+#     # y = get_random_element(Zn_ring)
+#     # print(f"Сформирован открытый ключ: n={n} y = {y}")
 
-    # lyambda = int(get_Lambda(p,q))
-    # x = int(find_x(y, lyambda, n))
-    # print(f"Сформирован закрытый ключ: lambda={lyambda} x = {x}")
-
-
-    # m = int(input("Введите тестовое число для шифрования>\n"))
-    # u = get_random_element(Zn_ring)
-    # c = (y**m * (u**n))%n**2
-    # print(f"Зашифрованное сообщение: {c}")
+#     # lyambda = int(get_Lambda(p,q))
+#     # x = int(find_x(y, lyambda, n))
+#     # print(f"Сформирован закрытый ключ: lambda={lyambda} x = {x}")
 
 
-    # '''Дешифрование'''
-    # d = (c**lyambda)%n**2
-    # d = d // n
-    # d = (d * x) % n
-    # print(f"Дешифрованное сообщение: {d}")
+#     # m = int(input("Введите тестовое число для шифрования>\n"))
+#     # u = get_random_element(Zn_ring)
+#     # c = (y**m * (u**n))%n**2
+#     # print(f"Зашифрованное сообщение: {c}")
 
-    # PayeCryptoOps = PayePrimitiveOperations()
+
+#     # '''Дешифрование'''
+#     # d = (c**lyambda)%n**2
+#     # d = d // n
+#     # d = (d * x) % n
+#     # print(f"Дешифрованное сообщение: {d}")
+
+#     # PayeCryptoOps = PayePrimitiveOperations()
     
