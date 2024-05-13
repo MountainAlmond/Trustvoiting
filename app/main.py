@@ -442,6 +442,7 @@ create_election_html = """
         <input type="number" name="votesPerCapita" id="votesPerCapita" required><br><br>
         <input type="submit" value="Create Election">
     </form>
+    <a href="/admin">back to admin panel</a>
 
     <script>
         document.getElementById('candidateCount').addEventListener('input', function() {
@@ -512,6 +513,7 @@ vote_html = """
         {% endfor %}
         <input type="submit" value="Vote">
     </form>
+    <a href="/">back to user panel</a>
 </body>
 </html>
 """
@@ -571,6 +573,7 @@ register_html = """
         <input type="password" id="password" name="password" required><br>
         <input type="submit" value="Register">
     </form>
+    <a href="/">back to user panel</a>
 </body>
 </html>
 """
@@ -630,6 +633,7 @@ login_html = """
         <input type="password" id="password" name="password" required><br>
         <input type="submit" value="Login">
     </form>
+    <a href="/">back to user panel</a>
 </body>
 </html>
 """
@@ -670,6 +674,31 @@ election_results_tpl = """
 </html>
 """
 
+one_message_bullshit = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Action Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ message }}</h1>
+    <a href="/admin">back to admin panel</a>
+    <a href="/">back to user panel</a>
+</body>
+</html>
+"""
 
 # Routes
 @app.route('/')
@@ -690,7 +719,7 @@ def create_election():
         votes_per_capita = int(data['votesPerCapita'])
         print(candidate_names)
         final_vote.CreateElection(candidate_count, candidate_names, voters_count, votes_per_capita)
-        return "Election created successfully"
+        return render_template_string(one_message_bullshit, message="Election created successfully")
     return create_election_html
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -700,7 +729,7 @@ def register():
         passport = data['passport']
         password = data['password']
         final_vote.registerBeforeElection(passport, password)
-        return "Registered successfully"
+        return render_template_string(one_message_bullshit, message="Registered successfully")
     return register_html
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -710,10 +739,9 @@ def login():
         password = data['password']
         passport = data['passport']
         user_id, public_key = final_vote.UserLogin(password, passport)
-        response = make_response("Login successful")
         response.set_cookie('user_id', json.dumps(user_id))
         response.set_cookie('public_key', encode_and_pickle(str(public_key)))#hack-it's not really a key
-        return response
+        return render_template_string(one_message_bullshit, message="Login successful")
     return login_html
 
 @app.route('/vote', methods=['POST', 'GET'])
@@ -725,7 +753,7 @@ def vote():
         print(votes)
         print(final_vote.a.votingFacade.candidates)
         final_vote.Vote(user_id, public_key, votes)
-        return "Vote recorded"
+        return render_template_string(one_message_bullshit, message="Vote recorded")
     return render_template_string(vote_html, CandidateList=final_vote.a.votingFacade.candidates)
 
 @app.route('/electionResults')
@@ -737,7 +765,7 @@ def election_results():
 def start_election():
     # Add logic to start the election
     final_vote.StartElection()
-    return "Election started"
+    return render_template_string(one_message_bullshit, message="Election started")
 
 def encode_and_pickle(obj):
     pickled_obj = pickle.dumps(obj)
@@ -771,6 +799,8 @@ error_html_template = """
 <body>
     <h1>{error_code} {error_title}</h1>
     <p>{error_message}</p>
+    <a href="/admin">back to admin panel</a>
+    <a href="/">back to user panel</a>
 </body>
 </html>
 """
