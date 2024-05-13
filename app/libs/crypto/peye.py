@@ -1,6 +1,9 @@
 import random
 from collections import namedtuple
 
+VOTE_UPPER_BOUND=9
+VOTE_LOWER_BOUND=0
+
 """Класс, объединяющий в себе все примитивные операции для реализации схемы Пейэ"""
 
 
@@ -216,7 +219,7 @@ class PortionVoiting:
         self._enc_voices = enc_voices
 
     def count_voices(self):
-        if len(self._enc_voices) > 9 or len(self._enc_voices) <= 0:
+        if len(self._enc_voices) > VOTE_UPPER_BOUND or len(self._enc_voices) <= VOTE_LOWER_BOUND:
             raise ValueError(
                 "Некорректный размер порции голосования! Размер порции должен быть не более 9 голосов и строго не меньше 0."
             )

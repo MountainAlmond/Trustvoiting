@@ -10,8 +10,8 @@ if __name__ == "__main__":
 
     encoder = VoiceEncoder(open_key)
 
-    portion.append_enc_voice(encoder.create_voice(100))
-    portion.append_enc_voice(encoder.create_voice(10000))
+    portion.append_enc_voice(encoder.create_voice(10))
+    portion.append_enc_voice(encoder.create_voice(1000))
 
     portion.count_voices()
     portion.dec_res()
@@ -21,8 +21,8 @@ if __name__ == "__main__":
     open_key = portion2.get_open_key()
     encoder = VoiceEncoder(open_key)
 
-    portion2.append_enc_voice(encoder.create_voice(100))
     portion2.append_enc_voice(encoder.create_voice(1000))
+    portion2.append_enc_voice(encoder.create_voice(100))
     portion2.count_voices()
     portion2.dec_res()
     print(portion.get_dec_res() + portion2.get_dec_res(), "\n")
