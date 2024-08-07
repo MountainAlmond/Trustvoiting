@@ -4,7 +4,7 @@ from collections import namedtuple
 VOTE_UPPER_BOUND=9
 VOTE_LOWER_BOUND=0
 
-"""Класс, объединяющий в себе все примитивные операции для реализации схемы Пейэ"""
+"""Класс, объединяющий в себе все примитивные операции для реализации схемы Пейэ """
 
 
 class PayePrimitiveOperations:
